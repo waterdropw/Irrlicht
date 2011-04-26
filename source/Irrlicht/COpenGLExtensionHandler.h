@@ -299,6 +299,7 @@ static const char* const OpenGLFeatureStrings[] = {
 	"GL_EXT_texture_shared_exponent",
 	"GL_EXT_texture_snorm",
 	"GL_EXT_texture_sRGB",
+	"GL_EXT_texture_sRGB_decode",
 	"GL_EXT_texture_swizzle",
 	"GL_EXT_timer_query",
 	"GL_EXT_transform_feedback",
@@ -698,6 +699,7 @@ class COpenGLExtensionHandler
 		IRR_EXT_texture_shared_exponent,
 		IRR_EXT_texture_snorm,
 		IRR_EXT_texture_sRGB,
+		IRR_EXT_texture_sRGB_decode,
 		IRR_EXT_texture_swizzle,
 		IRR_EXT_timer_query,
 		IRR_EXT_transform_feedback,
@@ -1044,10 +1046,16 @@ class COpenGLExtensionHandler
 	void extGlGetQueryObjectiv(GLuint id, GLenum pname, GLint *params);
 	void extGlGetQueryObjectuiv(GLuint id, GLenum pname, GLuint *params);
 
-	protected:
+	// generic vsync setting method for several extensions
+	void extGlSwapInterval(int interval);
+
+	// blend operations
+	void extGlBlendEquation(GLenum mode);
+
 	// the global feature array
 	bool FeatureAvailable[IRR_OpenGL_Feature_Count];
 
+	protected:
 	#if defined(_IRR_OPENGL_USE_EXTPOINTER_)
 		PFNGLACTIVETEXTUREARBPROC pGlActiveTextureARB;
 		PFNGLCLIENTACTIVETEXTUREARBPROC	pGlClientActiveTextureARB;
@@ -1104,9 +1112,6 @@ class COpenGLExtensionHandler
 		PFNGLSTENCILFUNCSEPARATEATIPROC pGlStencilFuncSeparateATI;
 		PFNGLSTENCILOPSEPARATEATIPROC pGlStencilOpSeparateATI;
 		PFNGLCOMPRESSEDTEXIMAGE2DPROC pGlCompressedTexImage2D;
-		#if defined(_IRR_LINUX_PLATFORM_) && defined(GLX_SGI_swap_control)
-		PFNGLXSWAPINTERVALSGIPROC glxSwapIntervalSGI;
-		#endif
 		PFNGLBINDFRAMEBUFFEREXTPROC pGlBindFramebufferEXT;
 		PFNGLDELETEFRAMEBUFFERSEXTPROC pGlDeleteFramebuffersEXT;
 		PFNGLGENFRAMEBUFFERSEXTPROC pGlGenFramebuffersEXT;
@@ -1155,6 +1160,20 @@ class COpenGLExtensionHandler
 		PFNGLENDOCCLUSIONQUERYNVPROC pGlEndOcclusionQueryNV;
 		PFNGLGETOCCLUSIONQUERYIVNVPROC pGlGetOcclusionQueryivNV;
 		PFNGLGETOCCLUSIONQUERYUIVNVPROC pGlGetOcclusionQueryuivNV;
+		PFNGLBLENDEQUATIONEXTPROC pGlBlendEquationEXT;
+		PFNGLBLENDEQUATIONPROC pGlBlendEquation;
+		#if defined(WGL_EXT_swap_control)
+		PFNWGLSWAPINTERVALEXTPROC pWglSwapIntervalEXT;
+		#endif
+		#if defined(GLX_SGI_swap_control)
+		PFNGLXSWAPINTERVALSGIPROC pGlxSwapIntervalSGI;
+		#endif
+		#if defined(GLX_EXT_swap_control)
+		PFNGLXSWAPINTERVALEXTPROC pGlxSwapIntervalEXT;
+		#endif
+		#if defined(GLX_MESA_swap_control)
+		PFNGLXSWAPINTERVALMESAPROC pGlxSwapIntervalMESA;
+		#endif
 	#endif
 };
 
@@ -2297,6 +2316,63 @@ inline void COpenGLExtensionHandler::extGlGetQueryObjectuiv(GLuint id, GLenum pn
 	glGetOcclusionQueryuivNV(id, pname, params);
 #else
 	os::Printer::log("glGetQueryObjectuiv not supported", ELL_ERROR);
+#endif
+}
+
+inline void COpenGLExtensionHandler::extGlSwapInterval(int interval)
+{
+	// we have wglext, so try to use that
+#if defined(_IRR_WINDOWS_API_) && defined(_IRR_COMPILE_WITH_WINDOWS_DEVICE_)
+#ifdef WGL_EXT_swap_control
+	if (pWglSwapIntervalEXT)
+		pWglSwapIntervalEXT(interval);
+#endif
+#endif
+#ifdef _IRR_COMPILE_WITH_X11_DEVICE_
+	//TODO: Check GLX_EXT_swap_control and GLX_MESA_swap_control
+#ifdef GLX_SGI_swap_control
+	// does not work with interval==0
+#ifdef _IRR_OPENGL_USE_EXTPOINTER_
+	if (interval && pGlxSwapIntervalSGI)
+		pGlxSwapIntervalSGI(interval);
+#else
+	if (interval)
+		glXSwapIntervalSGI(interval);
+#endif
+#elif defined(GLX_EXT_swap_control)
+#ifdef _IRR_OPENGL_USE_EXTPOINTER_
+	Display *dpy = glXGetCurrentDisplay();
+	GLXDrawable drawable = glXGetCurrentDrawable();
+
+	if (pGlxSwapIntervalEXT)
+		pGlxSwapIntervalEXT(dpy, drawable, interval);
+#else
+	pGlXSwapIntervalEXT(dpy, drawable, interval);
+#endif
+#elif defined(GLX_MESA_swap_control)
+#ifdef _IRR_OPENGL_USE_EXTPOINTER_
+	if (pGlxSwapIntervalMESA)
+		pGlxSwapIntervalMESA(interval);
+#else
+	pGlXSwapIntervalMESA(interval);
+#endif
+#endif
+#endif
+}
+
+inline void COpenGLExtensionHandler::extGlBlendEquation(GLenum mode)
+{
+#ifdef _IRR_OPENGL_USE_EXTPOINTER_
+	if (pGlBlendEquation)
+		pGlBlendEquation(mode);
+	else if (pGlBlendEquationEXT)
+		pGlBlendEquationEXT(mode);
+#elif defined(GL_EXT_blend_minmax) || defined(GL_EXT_blend_subtract) || defined(GL_EXT_blend_logic_op)
+	glBlendEquationEXT(mode);
+#elif defined(GL_VERSION_1_2)
+	glBlendEquation(mode);
+#else
+	os::Printer::log("glBlendEquation not supported", ELL_ERROR);
 #endif
 }
 

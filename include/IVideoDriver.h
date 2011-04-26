@@ -84,11 +84,11 @@ namespace video
 		ETS_COUNT
 	};
 
-	//! enumeration for signalling ressources which were lost after the last render cycle
-	/** These values can be signalled by the driver, telling the app that some ressources
+	//! enumeration for signaling resources which were lost after the last render cycle
+	/** These values can be signaled by the driver, telling the app that some resources
 	were lost and need to be recreated. Irrlicht will sometimes recreate the actual objects,
 	but the content needs to be recreated by the application. */
-	enum E_LOST_RESSOURCE
+	enum E_LOST_RESOURCE
 	{
 		//! The whole device/driver is lost
 		ELR_DEVICE = 1,
@@ -336,7 +336,7 @@ namespace video
 		//! Retrieve the given image loader
 		/** \param n The index of the loader to retrieve. This parameter is an 0-based
 		array index.
-		\return A pointer to the specified loader, 0 if the index is uncorrect. */
+		\return A pointer to the specified loader, 0 if the index is incorrect. */
 		virtual IImageLoader* getImageLoader(u32 n) = 0;
 
 		//! Retrieve the number of image writers
@@ -346,7 +346,7 @@ namespace video
 		//! Retrieve the given image writer
 		/** \param n The index of the writer to retrieve. This parameter is an 0-based
 		array index.
-		\return A pointer to the specified writer, 0 if the index is uncorrect. */
+		\return A pointer to the specified writer, 0 if the index is incorrect. */
 		virtual IImageWriter* getImageWriter(u32 n) = 0;
 
 		//! Sets a material.
@@ -462,7 +462,7 @@ namespace video
 
 		//! Create occlusion query.
 		/** Use node for identification and mesh for occlusion test. */
-		virtual void createOcclusionQuery(scene::ISceneNode* node,
+		virtual void addOcclusionQuery(scene::ISceneNode* node,
 				const scene::IMesh* mesh=0) =0;
 
 		//! Remove occlusion query.
@@ -512,7 +512,8 @@ namespace video
 		\param zeroTexels \deprecated If set to true, then any texels that match
 		the color key will have their color, as well as their alpha, set to zero
 		(i.e. black). This behaviour matches the legacy (buggy) behaviour prior
-		to release 1.5 and is provided for backwards compatibility only.*/
+		to release 1.5 and is provided for backwards compatibility only. 
+		This parameter may be removed by Irrlicht 1.9. */
 		virtual void makeColorKeyTexture(video::ITexture* texture,
 						video::SColor color,
 						bool zeroTexels = false) const =0;
@@ -528,7 +529,8 @@ namespace video
 		\param zeroTexels \deprecated If set to true, then any texels that match
 		the color key will have their color, as well as their alpha, set to zero
 		(i.e. black). This behaviour matches the legacy (buggy) behaviour prior
-		to release 1.5 and is provided for backwards compatibility only.*/
+		to release 1.5 and is provided for backwards compatibility only.
+		This parameter may be removed by Irrlicht 1.9. */
 		virtual void makeColorKeyTexture(video::ITexture* texture,
 				core::position2d<s32> colorKeyPixelPos,
 				bool zeroTexels = false) const =0;
@@ -1211,23 +1213,23 @@ namespace video
 		virtual IImage* createImage(ECOLOR_FORMAT format, const core::dimension2d<u32>& size) =0;
 
 		//! Creates a software image by converting it to given format from another image.
-		/** \deprecated Create an empty image and use copyTo()
+		/** \deprecated Create an empty image and use copyTo(). This method may be removed by Irrlicht 1.9.
 		\param format Desired color format of the image.
 		\param imageToCopy Image to copy to the new image.
 		\return The created image.
 		If you no longer need the image, you should call IImage::drop().
 		See IReferenceCounted::drop() for more information. */
-		virtual IImage* createImage(ECOLOR_FORMAT format, IImage *imageToCopy) =0;
+		_IRR_DEPRECATED_ virtual IImage* createImage(ECOLOR_FORMAT format, IImage *imageToCopy) =0;
 
 		//! Creates a software image from a part of another image.
-		/** \deprecated Create an empty image and use copyTo()
+		/** \deprecated Create an empty image and use copyTo(). This method may be removed by Irrlicht 1.9.
 		\param imageToCopy Image to copy to the new image in part.
 		\param pos Position of rectangle to copy.
 		\param size Extents of rectangle to copy.
 		\return The created image.
 		If you no longer need the image, you should call IImage::drop().
 		See IReferenceCounted::drop() for more information. */
-		virtual IImage* createImage(IImage* imageToCopy,
+		_IRR_DEPRECATED_ virtual IImage* createImage(IImage* imageToCopy,
 				const core::position2d<s32>& pos,
 				const core::dimension2d<u32>& size) =0;
 

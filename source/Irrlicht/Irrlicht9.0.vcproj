@@ -1109,6 +1109,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\include\ISceneLoader.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\include\ISceneManager.h"
 					>
 				</File>
@@ -1377,6 +1381,14 @@
 					>
 				</File>
 				<File
+					RelativePath="CSceneLoaderIrr.cpp"
+					>
+				</File>
+				<File
+					RelativePath="CSceneLoaderIrr.h"
+					>
+				</File>
+				<File
 					RelativePath="CSceneManager.cpp"
 					>
 				</File>
@@ -1397,6 +1409,14 @@
 					</File>
 					<File
 						RelativePath="C3DSMeshFileLoader.h"
+						>
+					</File>
+					<File
+						RelativePath="CSMFMeshFileLoader.cpp"
+						>
+					</File>
+					<File
+						RelativePath="CSMFMeshFileLoader.h"
 						>
 					</File>
 					<File

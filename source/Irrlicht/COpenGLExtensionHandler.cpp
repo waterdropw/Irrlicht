@@ -51,7 +51,16 @@ COpenGLExtensionHandler::COpenGLExtensionHandler() :
 	pGlStencilFuncSeparateATI(0), pGlStencilOpSeparateATI(0),
 	pGlCompressedTexImage2D(0),
 #if defined(GLX_SGI_swap_control)
-	glxSwapIntervalSGI(0),
+	pGlxSwapIntervalSGI(0),
+#endif
+#if defined(GLX_EXT_swap_control)
+	pGlxSwapIntervalEXT(0),
+#endif
+#if defined(GLX_MESA_swap_control)
+	pGlxSwapIntervalMESA(0),
+#endif
+#if defined(WGL_EXT_swap_control)
+	pWglSwapIntervalEXT(0),
 #endif
 	pGlBindFramebufferEXT(0), pGlDeleteFramebuffersEXT(0), pGlGenFramebuffersEXT(0),
 	pGlCheckFramebufferStatusEXT(0), pGlFramebufferTexture2DEXT(0),
@@ -71,7 +80,8 @@ COpenGLExtensionHandler::COpenGLExtensionHandler() :
 	pGlGenOcclusionQueriesNV(0), pGlDeleteOcclusionQueriesNV(0),
 	pGlIsOcclusionQueryNV(0), pGlBeginOcclusionQueryNV(0),
 	pGlEndOcclusionQueryNV(0), pGlGetOcclusionQueryivNV(0),
-	pGlGetOcclusionQueryuivNV(0)
+	pGlGetOcclusionQueryuivNV(0),
+	pGlBlendEquationEXT(0), pGlBlendEquation(0)
 #endif // _IRR_OPENGL_USE_EXTPOINTER_
 {
 	for (u32 i=0; i<IRR_OpenGL_Feature_Count; ++i)
@@ -258,6 +268,15 @@ void COpenGLExtensionHandler::initExtensions(bool stencilBuffer)
 	pGlEndOcclusionQueryNV = (PFNGLENDOCCLUSIONQUERYNVPROC) wglGetProcAddress("glEndOcclusionQueryNV");
 	pGlGetOcclusionQueryivNV = (PFNGLGETOCCLUSIONQUERYIVNVPROC) wglGetProcAddress("glGetOcclusionQueryivNV");
 	pGlGetOcclusionQueryuivNV = (PFNGLGETOCCLUSIONQUERYUIVNVPROC) wglGetProcAddress("glGetOcclusionQueryuivNV");
+
+	// blend equation
+	pGlBlendEquationEXT = (PFNGLBLENDEQUATIONEXTPROC) wglGetProcAddress("glBlendEquationEXT");
+	pGlBlendEquation = (PFNGLBLENDEQUATIONPROC) wglGetProcAddress("glBlendEquation");
+
+	#if defined(WGL_EXT_swap_control) && !defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+		// get vsync extension
+		pWglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC) wglGetProcAddress("wglSwapIntervalEXT");
+	#endif
 
 #elif defined(_IRR_COMPILE_WITH_X11_DEVICE_) || defined (_IRR_COMPILE_WITH_SDL_DEVICE_)
 	#ifdef _IRR_OPENGL_USE_EXTPOINTER_
@@ -458,9 +477,15 @@ void COpenGLExtensionHandler::initExtensions(bool stencilBuffer)
 	pGlCompressedTexImage2D = (PFNGLCOMPRESSEDTEXIMAGE2DPROC)
 		IRR_OGL_LOAD_EXTENSION(reinterpret_cast<const GLubyte*>("glCompressedTexImage2D"));
 
+	// get vsync extension
 	#if defined(GLX_SGI_swap_control) && !defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-		// get vsync extension
-		glxSwapIntervalSGI = (PFNGLXSWAPINTERVALSGIPROC)IRR_OGL_LOAD_EXTENSION(reinterpret_cast<const GLubyte*>("glXSwapIntervalSGI"));
+		pGlxSwapIntervalSGI = (PFNGLXSWAPINTERVALSGIPROC)IRR_OGL_LOAD_EXTENSION(reinterpret_cast<const GLubyte*>("glXSwapIntervalSGI"));
+	#endif
+	#if defined(GLX_EXT_swap_control) && !defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+		pGlxSwapIntervalEXT = (PFNGLXSWAPINTERVALEXTPROC)IRR_OGL_LOAD_EXTENSION(reinterpret_cast<const GLubyte*>("glXSwapIntervalEXT"));
+	#endif
+	#if defined(GLX_MESA_swap_control) && !defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+		pGlxSwapIntervalMESA = (PFNGLXSWAPINTERVALMESAPROC)IRR_OGL_LOAD_EXTENSION(reinterpret_cast<const GLubyte*>("glXSwapIntervalMESA"));
 	#endif
 
 	// FrameBufferObjects
@@ -596,6 +621,12 @@ void COpenGLExtensionHandler::initExtensions(bool stencilBuffer)
 
 	pGlGetOcclusionQueryuivNV = (PFNGLGETOCCLUSIONQUERYUIVNVPROC)
 	IRR_OGL_LOAD_EXTENSION(reinterpret_cast<const GLubyte*>("glGetOcclusionQueryuivNV"));
+
+	// blend equation
+	pGlBlendEquationEXT = (PFNGLBLENDEQUATIONEXTPROC)
+	IRR_OGL_LOAD_EXTENSION(reinterpret_cast<const GLubyte*>("glBlendEquationEXT"));
+	pGlBlendEquation = (PFNGLBLENDEQUATIONPROC)
+	IRR_OGL_LOAD_EXTENSION(reinterpret_cast<const GLubyte*>("glBlendEquation"));
 
 	#endif // _IRR_OPENGL_USE_EXTPOINTER_
 #endif // _IRR_WINDOWS_API_
@@ -802,6 +833,12 @@ bool COpenGLExtensionHandler::queryFeature(E_VIDEO_DRIVER_FEATURE feature) const
 		return FeatureAvailable[IRR_ARB_draw_buffers_blend] || FeatureAvailable[IRR_AMD_draw_buffers_blend];
 	case EVDF_OCCLUSION_QUERY:
 		return FeatureAvailable[IRR_ARB_occlusion_query] && OcclusionQuerySupport;
+	case EVDF_POLYGON_OFFSET:
+		// both features supported with OpenGL 1.1
+		return Version>=110;
+	case EVDF_BLEND_OPERATIONS:
+		return (Version>=120) || FeatureAvailable[IRR_EXT_blend_minmax] ||
+			FeatureAvailable[IRR_EXT_blend_subtract] || FeatureAvailable[IRR_EXT_blend_logic_op];
 	default:
 		return false;
 	};
