@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2011 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -539,7 +539,7 @@ namespace scene
 		/** A bitwise OR of the types from @ref irr::scene::E_DEBUG_SCENE_TYPE.
 		Please note that not all scene nodes support all debug data types.
 		\param state The debug data visibility state to be used. */
-		virtual void setDebugDataVisible(s32 state)
+		virtual void setDebugDataVisible(u32 state)
 		{
 			DebugDataVisible = state;
 		}
@@ -547,7 +547,7 @@ namespace scene
 		//! Returns if debug data like bounding boxes are drawn.
 		/** \return A bitwise OR of the debug data values from
 		@ref irr::scene::E_DEBUG_SCENE_TYPE that are currently visible. */
-		s32 isDebugDataVisible() const
+		u32 isDebugDataVisible() const
 		{
 			return DebugDataVisible;
 		}
@@ -831,7 +831,7 @@ namespace scene
 		u32 AutomaticCullingState;
 
 		//! Flag if debug data should be drawn, such as Bounding Boxes.
-		s32 DebugDataVisible;
+		u32 DebugDataVisible;
 
 		//! Is the node visible?
 		bool IsVisible;

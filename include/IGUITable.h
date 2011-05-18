@@ -1,4 +1,4 @@
-// Copyright (C) 2003-2009 Nikolaus Gebhardt
+// Copyright (C) 2003-2011 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -113,6 +113,9 @@ namespace gui
 		//! Set the width of a column
 		virtual void setColumnWidth(u32 columnIndex, u32 width) = 0;
 
+		//! Get the width of a column
+		virtual u32 getColumnWidth(u32 columnIndex) const = 0;
+
 		//! columns can be resized by drag 'n drop
 		virtual void setResizableColumns(bool resizable) = 0;
 
@@ -149,7 +152,7 @@ namespace gui
 		//! clears the table rows, but keeps the columns intact
 		virtual void clearRows() = 0;
 
-		//! Swap two row positions. This is useful for a custom ordering algo.
+		//! Swap two row positions.
 		virtual void swapRows(u32 rowIndexA, u32 rowIndexB) = 0;
 
 		//! This tells the table to start ordering all the rows.

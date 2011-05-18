@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt / Thomas Alten
+// Copyright (C) 2002-2011 Nikolaus Gebhardt / Thomas Alten
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -12,6 +12,7 @@
 #include "CSoftware2MaterialRenderer.h"
 #include "S3DVertex.h"
 #include "S4DVertex.h"
+#include "CBlit.h"
 
 
 #define MAT_TEXTURE(tex) ( (video::CSoftwareTexture2*) Material.org.getTexture ( tex ) )
@@ -204,7 +205,6 @@ vec3 fnormal(void)
 }
 
 
-
 struct program1
 {
 	vec4 Ambient;
@@ -355,6 +355,12 @@ CBurningVideoDriver::CBurningVideoDriver(const irr::SIrrlichtCreationParameters&
 		if ( params.Stencilbuffer )
 			StencilBuffer = video::createStencilBuffer(BackBuffer->getDimension());
 	}
+
+	DriverAttributes->setAttribute("MaxTextures", 2);
+	DriverAttributes->setAttribute("MaxIndices", 1<<16);
+	DriverAttributes->setAttribute("MaxTextureSize", 1024);
+	DriverAttributes->setAttribute("MaxTextureLODBias", 16.f);
+	DriverAttributes->setAttribute("Version", 45);
 
 	// create triangle renderers
 
@@ -775,7 +781,6 @@ void CBurningVideoDriver::setViewPort(const core::rect<s32>& area)
 	ViewPort.clipAgainst(rendert);
 
 	Transformation [ ETS_CLIPSCALE ].buildNDCToDCMatrix ( ViewPort, 1 );
-
 
 	if (CurrentShader)
 		CurrentShader->setRenderTarget(RenderTargetSurface, ViewPort);
@@ -2218,16 +2223,53 @@ void CBurningVideoDriver::draw2DImage(const video::ITexture* texture, const core
 			return;
 		}
 
+#if 0
+		// 2d methods don't use viewPort
+		core::position2di dest = destPos;
+		core::recti clip=ViewPort;
+		if (ViewPort.getSize().Width != ScreenSize.Width)
+		{
+			dest.X=ViewPort.UpperLeftCorner.X+core::round32(destPos.X*ViewPort.getWidth()/(f32)ScreenSize.Width);
+			dest.Y=ViewPort.UpperLeftCorner.Y+core::round32(destPos.Y*ViewPort.getHeight()/(f32)ScreenSize.Height);
+			if (clipRect)
+			{
+				clip.constrainTo(*clipRect);
+			}
+			clipRect = &clip;
+		}
+#endif
 		if (useAlphaChannelOfTexture)
 			((CSoftwareTexture2*)texture)->getImage()->copyToWithAlpha(
-				BackBuffer, destPos, sourceRect, color, clipRect);
+			RenderTargetSurface, destPos, sourceRect, color, clipRect);
 		else
 			((CSoftwareTexture2*)texture)->getImage()->copyTo(
-				BackBuffer, destPos, sourceRect, clipRect);
+				RenderTargetSurface, destPos, sourceRect, clipRect);
 	}
 }
 
 
+//! Draws a part of the texture into the rectangle.
+void CBurningVideoDriver::draw2DImage(const video::ITexture* texture, const core::rect<s32>& destRect,
+		const core::rect<s32>& sourceRect, const core::rect<s32>* clipRect,
+		const video::SColor* const colors, bool useAlphaChannelOfTexture)
+{
+	if (texture)
+	{
+		if (texture->getDriverType() != EDT_BURNINGSVIDEO)
+		{
+			os::Printer::log("Fatal Error: Tried to copy from a surface not owned by this driver.", ELL_ERROR);
+			return;
+		}
+	
+	if (useAlphaChannelOfTexture)
+		StretchBlit(BLITTER_TEXTURE_ALPHA_BLEND, RenderTargetSurface, &destRect, &sourceRect,
+			    ((CSoftwareTexture2*)texture)->getImage(), (colors ? colors[0].color : 0));
+	else
+		StretchBlit(BLITTER_TEXTURE, RenderTargetSurface, &destRect, &sourceRect,
+			    ((CSoftwareTexture2*)texture)->getImage(), (colors ? colors[0].color : 0));
+	}
+}
+    
 //! Draws a 2d line.
 void CBurningVideoDriver::draw2DLine(const core::position2d<s32>& start,
 					const core::position2d<s32>& end,
@@ -2493,7 +2535,7 @@ const wchar_t* CBurningVideoDriver::getName() const
 //! Returns the graphics card vendor name.
 core::stringc CBurningVideoDriver::getVendorInfo()
 {
-	return "Burning's Video: Ing. Thomas Alten (c) 2006-2010";
+	return "Burning's Video: Ing. Thomas Alten (c) 2006-2011";
 }
 
 
@@ -2642,16 +2684,19 @@ void CBurningVideoDriver::drawStencilShadowVolume(const core::vector3df* triangl
 void CBurningVideoDriver::drawStencilShadow(bool clearStencilBuffer, video::SColor leftUpEdge,
 	video::SColor rightUpEdge, video::SColor leftDownEdge, video::SColor rightDownEdge)
 {
+	if (!StencilBuffer)
+		return;
 	// draw a shadow rectangle covering the entire screen using stencil buffer
 	const u32 h = RenderTargetSurface->getDimension().Height;
 	const u32 w = RenderTargetSurface->getDimension().Width;
 	tVideoSample *dst;
 	u32 *stencil;
+	u32* const stencilBase=(u32*) StencilBuffer->lock();
 
 	for ( u32 y = 0; y < h; ++y )
 	{
 		dst = (tVideoSample*)RenderTargetSurface->lock() + ( y * w );
-		stencil = (u32*) StencilBuffer->lock() + ( y * w );
+		stencil =  stencilBase + ( y * w );
 
 		for ( u32 x = 0; x < w; ++x )
 		{

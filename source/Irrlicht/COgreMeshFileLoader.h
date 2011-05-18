@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2011 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 // orginally written by Christian Stehno, modified by Nikolaus Gebhardt
@@ -81,9 +81,7 @@ private:
 
 	struct OgreTexture
 	{
-		OgreTexture() : Filename("") {}
-
-		core::stringc Filename;
+		core::array<core::stringc> Filename;
 		core::stringc Alias;
 		core::stringc CoordsType;
 		core::stringc MipMaps;

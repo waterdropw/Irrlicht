@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2009 Colin MacDonald
+// Copyright (C) 2008-2011 Colin MacDonald
 // No rights reserved: this software is in the public domain.
 
 #include "testUtils.h"
@@ -60,7 +60,7 @@ bool loadFromFileFolder(void)
 	readFile->drop();
 
 	// adding  a folder archive
-	device->getFileSystem()->addFolderFileArchive( "../media/" );
+	device->getFileSystem()->addFileArchive( "../media/" );
 
 	ITexture * tex3 = driver->getTexture("tools.png");
 	assert(tex3);
@@ -82,6 +82,8 @@ bool loadFromFileFolder(void)
 		return false;
 	}
 
+	device->closeDevice();
+	device->run();
 	device->drop();
 	return ((tex1 == tex2) && (tex1 == tex3) && (tex1 == tex4));
 }

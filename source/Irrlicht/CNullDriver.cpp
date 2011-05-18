@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2011 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -14,6 +14,7 @@
 #include "IAnimatedMeshSceneNode.h"
 #include "CMeshManipulator.h"
 #include "CColorConverter.h"
+#include "IAttributeExchangingObject.h"
 
 
 namespace irr
@@ -79,7 +80,6 @@ IImageWriter* createImageWriterPNG();
 //! creates a writer which is able to save ppm images
 IImageWriter* createImageWriterPPM();
 
-
 //! constructor
 CNullDriver::CNullDriver(io::IFileSystem* io, const core::dimension2d<u32>& screenSize)
 : FileSystem(io), MeshManipulator(0), ViewPort(0,0,0,0), ScreenSize(screenSize),
@@ -89,6 +89,22 @@ CNullDriver::CNullDriver(io::IFileSystem* io, const core::dimension2d<u32>& scre
 	#ifdef _DEBUG
 	setDebugName("CNullDriver");
 	#endif
+
+	DriverAttributes = new io::CAttributes();
+	DriverAttributes->addInt("MaxTextures", _IRR_MATERIAL_MAX_TEXTURES_);
+	DriverAttributes->addInt("MaxSupportedTextures", _IRR_MATERIAL_MAX_TEXTURES_);
+	DriverAttributes->addInt("MaxLights", getMaximalDynamicLightAmount());
+	DriverAttributes->addInt("MaxAnisotropy", 1);
+//	DriverAttributes->addInt("MaxUserClipPlanes", 0);
+//	DriverAttributes->addInt("MaxAuxBuffers", 0);
+	DriverAttributes->addInt("MaxMultipleRenderTargets", 1);
+	DriverAttributes->addInt("MaxIndices", -1);
+	DriverAttributes->addInt("MaxTextureSize", -1);
+//	DriverAttributes->addInt("MaxGeometryVerticesOut", 0);
+//	DriverAttributes->addFloat("MaxTextureLODBias", 0.f);
+	DriverAttributes->addInt("Version", 1);
+//	DriverAttributes->addInt("ShaderLanguageVersion", 0);
+//	DriverAttributes->addInt("AntiAlias", 0);
 
 	setFog();
 
@@ -105,14 +121,20 @@ CNullDriver::CNullDriver(io::IFileSystem* io, const core::dimension2d<u32>& scre
 
 	// create surface loader
 
-#ifdef _IRR_COMPILE_WITH_BMP_LOADER_
-	SurfaceLoader.push_back(video::createImageLoaderBMP());
+#ifdef _IRR_COMPILE_WITH_HALFLIFE_LOADER_
+	SurfaceLoader.push_back(video::createImageLoaderHalfLife());
 #endif
-#ifdef _IRR_COMPILE_WITH_JPG_LOADER_
-	SurfaceLoader.push_back(video::createImageLoaderJPG());
+#ifdef _IRR_COMPILE_WITH_WAL_LOADER_
+	SurfaceLoader.push_back(video::createImageLoaderWAL());
 #endif
-#ifdef _IRR_COMPILE_WITH_TGA_LOADER_
-	SurfaceLoader.push_back(video::createImageLoaderTGA());
+#ifdef _IRR_COMPILE_WITH_LMP_LOADER_
+	SurfaceLoader.push_back(video::createImageLoaderLMP());
+#endif
+#ifdef _IRR_COMPILE_WITH_PPM_LOADER_
+	SurfaceLoader.push_back(video::createImageLoaderPPM());
+#endif
+#ifdef _IRR_COMPILE_WITH_RGB_LOADER_
+	SurfaceLoader.push_back(video::createImageLoaderRGB());
 #endif
 #ifdef _IRR_COMPILE_WITH_PSD_LOADER_
 	SurfaceLoader.push_back(video::createImageLoaderPSD());
@@ -123,48 +145,42 @@ CNullDriver::CNullDriver(io::IFileSystem* io, const core::dimension2d<u32>& scre
 #ifdef _IRR_COMPILE_WITH_PCX_LOADER_
 	SurfaceLoader.push_back(video::createImageLoaderPCX());
 #endif
+#ifdef _IRR_COMPILE_WITH_TGA_LOADER_
+	SurfaceLoader.push_back(video::createImageLoaderTGA());
+#endif
 #ifdef _IRR_COMPILE_WITH_PNG_LOADER_
 	SurfaceLoader.push_back(video::createImageLoaderPNG());
 #endif
-#ifdef _IRR_COMPILE_WITH_WAL_LOADER_
-	SurfaceLoader.push_back(video::createImageLoaderWAL());
+#ifdef _IRR_COMPILE_WITH_JPG_LOADER_
+	SurfaceLoader.push_back(video::createImageLoaderJPG());
 #endif
-#ifdef _IRR_COMPILE_WITH_LMP_LOADER_
-	SurfaceLoader.push_back(video::createImageLoaderLMP());
-#endif
-#ifdef _IRR_COMPILE_WITH_HALFLIFE_LOADER_
-	SurfaceLoader.push_back(video::createImageLoaderHalfLife());
-#endif
-
-#ifdef _IRR_COMPILE_WITH_PPM_LOADER_
-	SurfaceLoader.push_back(video::createImageLoaderPPM());
-#endif
-#ifdef _IRR_COMPILE_WITH_RGB_LOADER_
-	SurfaceLoader.push_back(video::createImageLoaderRGB());
+#ifdef _IRR_COMPILE_WITH_BMP_LOADER_
+	SurfaceLoader.push_back(video::createImageLoaderBMP());
 #endif
 
 
-#ifdef _IRR_COMPILE_WITH_BMP_WRITER_
-	SurfaceWriter.push_back(video::createImageWriterBMP());
-#endif
-#ifdef _IRR_COMPILE_WITH_JPG_WRITER_
-	SurfaceWriter.push_back(video::createImageWriterJPG());
-#endif
-#ifdef _IRR_COMPILE_WITH_TGA_WRITER_
-	SurfaceWriter.push_back(video::createImageWriterTGA());
-#endif
-#ifdef _IRR_COMPILE_WITH_PSD_WRITER_
-	SurfaceWriter.push_back(video::createImageWriterPSD());
+#ifdef _IRR_COMPILE_WITH_PPM_WRITER_
+	SurfaceWriter.push_back(video::createImageWriterPPM());
 #endif
 #ifdef _IRR_COMPILE_WITH_PCX_WRITER_
 	SurfaceWriter.push_back(video::createImageWriterPCX());
 #endif
+#ifdef _IRR_COMPILE_WITH_PSD_WRITER_
+	SurfaceWriter.push_back(video::createImageWriterPSD());
+#endif
+#ifdef _IRR_COMPILE_WITH_TGA_WRITER_
+	SurfaceWriter.push_back(video::createImageWriterTGA());
+#endif
+#ifdef _IRR_COMPILE_WITH_JPG_WRITER_
+	SurfaceWriter.push_back(video::createImageWriterJPG());
+#endif
 #ifdef _IRR_COMPILE_WITH_PNG_WRITER_
 	SurfaceWriter.push_back(video::createImageWriterPNG());
 #endif
-#ifdef _IRR_COMPILE_WITH_PPM_WRITER_
-	SurfaceWriter.push_back(video::createImageWriterPPM());
+#ifdef _IRR_COMPILE_WITH_BMP_WRITER_
+	SurfaceWriter.push_back(video::createImageWriterBMP());
 #endif
+
 
 	// set ExposedData to 0
 	memset(&ExposedData, 0, sizeof(ExposedData));
@@ -175,6 +191,7 @@ CNullDriver::CNullDriver(io::IFileSystem* io, const core::dimension2d<u32>& scre
 	InitMaterial2D.Lighting=false;
 	InitMaterial2D.ZWriteEnable=false;
 	InitMaterial2D.ZBuffer=video::ECFN_NEVER;
+	InitMaterial2D.UseMipMaps=false;
 	for (u32 i=0; i<video::MATERIAL_MAX_TEXTURES; ++i)
 	{
 		InitMaterial2D.TextureLayer[i].BilinearFilter=false;
@@ -188,6 +205,9 @@ CNullDriver::CNullDriver(io::IFileSystem* io, const core::dimension2d<u32>& scre
 //! destructor
 CNullDriver::~CNullDriver()
 {
+	if (DriverAttributes)
+		DriverAttributes->drop();
+
 	if (FileSystem)
 		FileSystem->drop();
 
@@ -242,7 +262,7 @@ u32 CNullDriver::getImageLoaderCount() const
 //! Retrieve the given image loader
 IImageLoader* CNullDriver::getImageLoader(u32 n)
 {
-	if(n < SurfaceLoader.size())
+	if (n < SurfaceLoader.size())
 		return SurfaceLoader[n];
 	return 0;
 }
@@ -258,7 +278,7 @@ u32 CNullDriver::getImageWriterCount() const
 //! Retrieve the given image writer
 IImageWriter* CNullDriver::getImageWriter(u32 n)
 {
-	if(n < SurfaceWriter.size())
+	if (n < SurfaceWriter.size())
 		return SurfaceWriter[n];
 	return 0;
 }
@@ -310,6 +330,13 @@ void CNullDriver::disableFeature(E_VIDEO_DRIVER_FEATURE feature, bool flag)
 bool CNullDriver::queryFeature(E_VIDEO_DRIVER_FEATURE feature) const
 {
 	return false;
+}
+
+
+//! Get attributes of the actual video driver
+const io::IAttributes& CNullDriver::getDriverAttributes() const
+{
+	return *DriverAttributes;
 }
 
 
@@ -408,7 +435,7 @@ ITexture* CNullDriver::getTexture(const io::path& filename)
 	// Now try to open the file using the complete path.
 	io::IReadFile* file = FileSystem->createAndOpenFile(absolutePath);
 
-	if(!file)
+	if (!file)
 	{
 		// Try to open it using the raw filename.
 		file = FileSystem->createAndOpenFile(filename);
@@ -463,10 +490,10 @@ ITexture* CNullDriver::getTexture(io::IReadFile* file)
 			addTexture(texture);
 			texture->drop(); // drop it because we created it, one grab too much
 		}
-	}
 
-	if (!texture)
-		os::Printer::log("Could not load texture", file->getFileName(), ELL_WARNING);
+		if (!texture)
+			os::Printer::log("Could not load texture", file->getFileName(), ELL_WARNING);
+	}
 
 	return texture;
 }
@@ -877,6 +904,7 @@ void CNullDriver::setAmbientLight(const SColorf& color)
 
 //! \return Returns the name of the video driver. Example: In case of the DIRECT3D8
 //! driver, it would return "Direct3D8".
+
 const wchar_t* CNullDriver::getName() const
 {
 	return L"Irrlicht NullDevice";
@@ -1060,7 +1088,7 @@ void CNullDriver::makeColorKeyTexture(video::ITexture* texture,
 
 	if (texture->getColorFormat() == ECF_A1R5G5B5)
 	{
-		u16 *p = (u16*)texture->lock(true);
+		u16 *p = (u16*)texture->lock(ETLM_READ_ONLY);
 
 		if (!p)
 		{
@@ -1076,7 +1104,7 @@ void CNullDriver::makeColorKeyTexture(video::ITexture* texture,
 	}
 	else
 	{
-		u32 *p = (u32*)texture->lock(true);
+		u32 *p = (u32*)texture->lock(ETLM_READ_ONLY);
 
 		if (!p)
 		{
@@ -1291,10 +1319,10 @@ IImage* CNullDriver::createImageFromFile(io::IReadFile* file)
 
 	IImage* image = 0;
 
-	u32 i;
+	s32 i;
 
 	// try to load file based on file extension
-	for (i=0; i<SurfaceLoader.size(); ++i)
+	for (i=SurfaceLoader.size()-1; i>=0; --i)
 	{
 		if (SurfaceLoader[i]->isALoadableFileExtension(file->getFileName()))
 		{
@@ -1307,7 +1335,7 @@ IImage* CNullDriver::createImageFromFile(io::IReadFile* file)
 	}
 
 	// try to load file based on what is in it
-	for (i=0; i<SurfaceLoader.size(); ++i)
+	for (i=SurfaceLoader.size()-1; i>=0; --i)
 	{
 		// dito
 		file->seek(0);
@@ -1343,7 +1371,7 @@ bool CNullDriver::writeImageToFile(IImage* image, io::IWriteFile * file, u32 par
 	if(!file)
 		return false;
 
-	for (u32 i=0; i<SurfaceWriter.size(); ++i)
+	for (s32 i=SurfaceWriter.size()-1; i>=0; --i)
 	{
 		if (SurfaceWriter[i]->isAWriteableFileExtension(file->getFileName()))
 		{
@@ -1414,9 +1442,9 @@ IImage* CNullDriver::createImage(IImage* imageToCopy, const core::position2d<s32
 //! Creates a software image from part of a texture.
 IImage* CNullDriver::createImage(ITexture* texture, const core::position2d<s32>& pos, const core::dimension2d<u32>& size)
 {
-	if (pos==core::position2di(0,0) && size == texture->getSize())
+	if ((pos==core::position2di(0,0)) && (size == texture->getSize()))
 	{
-		IImage* image = new CImage(texture->getColorFormat(), size, texture->lock(true), false);
+		IImage* image = new CImage(texture->getColorFormat(), size, texture->lock(ETLM_READ_ONLY), false);
 		texture->unlock();
 		return image;
 	}
@@ -1431,14 +1459,17 @@ IImage* CNullDriver::createImage(ITexture* texture, const core::position2d<s32>&
 					core::clamp(static_cast<u32>(size.Height), 0u, texture->getSize().Height)));
 		if (!clamped.isValid())
 			return 0;
-		void* src = texture->lock(true);
+		u8* src = static_cast<u8*>(texture->lock(ETLM_READ_ONLY));
 		if (!src)
 			return 0;
 		IImage* image = new CImage(texture->getColorFormat(), clamped.getSize());
-		void* dst = image->lock();
-		for (u32 i=clamped.UpperLeftCorner.X; i<clamped.getHeight(); ++i)
+		u8* dst = static_cast<u8*>(image->lock());
+		src += clamped.UpperLeftCorner.Y * texture->getPitch() + image->getBytesPerPixel() * clamped.UpperLeftCorner.X;
+		for (u32 i=0; i<clamped.getHeight(); ++i)
 		{
 			video::CColorConverter::convert_viaFormat(src, texture->getColorFormat(), clamped.getWidth(), dst, image->getColorFormat());
+			src += texture->getPitch();
+			dst += image->getPitch();
 		}
 		image->unlock();
 		texture->unlock();
@@ -1564,7 +1595,7 @@ bool CNullDriver::isHardwareBufferRecommend(const scene::IMeshBuffer* mb)
 
 //! Create occlusion query.
 /** Use node for identification and mesh for occlusion test. */
-void CNullDriver::createOcclusionQuery(scene::ISceneNode* node, const scene::IMesh* mesh)
+void CNullDriver::addOcclusionQuery(scene::ISceneNode* node, const scene::IMesh* mesh)
 {
 	if (!node)
 		return;
@@ -1760,7 +1791,8 @@ void CNullDriver::setMaterialRendererName(s32 idx, const char* name)
 
 
 //! Creates material attributes list from a material, usable for serialization and more.
-io::IAttributes* CNullDriver::createAttributesFromMaterial(const video::SMaterial& material)
+io::IAttributes* CNullDriver::createAttributesFromMaterial(const video::SMaterial& material,
+	io::SAttributeReadWriteOptions* options)
 {
 	io::CAttributes* attr = new io::CAttributes(this);
 
@@ -1778,7 +1810,16 @@ io::IAttributes* CNullDriver::createAttributesFromMaterial(const video::SMateria
 	core::stringc prefix="Texture";
 	u32 i;
 	for (i=0; i<MATERIAL_MAX_TEXTURES; ++i)
-		attr->addTexture((prefix+core::stringc(i+1)).c_str(), material.getTexture(i));
+	{
+		if (options && (options->Flags&io::EARWF_USE_RELATIVE_PATHS) && options->Filename && material.getTexture(i))
+		{
+			io::path path = FileSystem->getRelativeFilename(
+				FileSystem->getAbsolutePath(material.getTexture(i)->getName()), options->Filename);
+			attr->addTexture((prefix+core::stringc(i+1)).c_str(), material.getTexture(i), path);
+		}
+		else
+			attr->addTexture((prefix+core::stringc(i+1)).c_str(), material.getTexture(i));
+	}
 
 	attr->addBool("Wireframe", material.Wireframe);
 	attr->addBool("GouraudShading", material.GouraudShading);
@@ -1789,6 +1830,7 @@ io::IAttributes* CNullDriver::createAttributesFromMaterial(const video::SMateria
 	attr->addBool("FrontfaceCulling", material.FrontfaceCulling);
 	attr->addBool("FogEnable", material.FogEnable);
 	attr->addBool("NormalizeNormals", material.NormalizeNormals);
+	attr->addBool("UseMipMaps", material.UseMipMaps);
 	attr->addInt("AntiAliasing", material.AntiAliasing);
 	attr->addInt("ColorMask", material.ColorMask);
 
@@ -1853,6 +1895,11 @@ void CNullDriver::fillMaterialStructureFromAttributes(video::SMaterial& outMater
 	outMaterial.FrontfaceCulling = attr->getAttributeAsBool("FrontfaceCulling");
 	outMaterial.FogEnable = attr->getAttributeAsBool("FogEnable");
 	outMaterial.NormalizeNormals = attr->getAttributeAsBool("NormalizeNormals");
+	if (attr->existsAttribute("UseMipMaps")) // legacy
+		outMaterial.UseMipMaps = attr->getAttributeAsBool("UseMipMaps");
+	else
+		outMaterial.UseMipMaps = true;
+
 	// default 0 is ok
 	outMaterial.AntiAliasing = attr->getAttributeAsInt("AntiAliasing");
 	if (attr->existsAttribute("ColorMask"))

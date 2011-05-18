@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2011 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -121,7 +121,7 @@ namespace video
 
 		//! Create occlusion query.
 		/** Use node for identification and mesh for occlusion test. */
-		virtual void createOcclusionQuery(scene::ISceneNode* node,
+		virtual void addOcclusionQuery(scene::ISceneNode* node,
 				const scene::IMesh* mesh=0);
 
 		//! Remove occlusion query.
@@ -442,6 +442,8 @@ namespace video
 
 		u32 MaxTextureUnits;
 		u32 MaxUserClipPlanes;
+		u32 MaxMRTs;
+		u32 NumSetMRTs;
 		f32 MaxLightDistance;
 		s32 LastSetLight;
 

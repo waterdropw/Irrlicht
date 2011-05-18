@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Colin MacDonald
+// Copyright (C) 2008-2011 Colin MacDonald
 // No rights reserved: this software is in the public domain.
 
 #include "testUtils.h"
@@ -13,8 +13,8 @@ using namespace gui;
 namespace
 {
 
-// Basic tests
-bool matrices(void)
+// Basic tests for identity matrix
+bool identity(void)
 {
 	bool result = true;
 	matrix4 m;
@@ -175,6 +175,28 @@ bool rotations(void)
 	result &= (vec1.equals(core::vector3df(27.5400505f, 34.4302292f, 42.6845398f), 0.000002f));
 	assert(result);
 
+	// corner cases
+    rot1.setRotationDegrees(irr::core::vector3df(180.0f, 0.f, 0.f));
+    vec1=rot1.getRotationDegrees();
+	result &= (vec1.equals(core::vector3df(180.0f, 0.f, 0.f), 0.000002f));
+	assert(result);
+    rot1.setRotationDegrees(irr::core::vector3df(0.f, 180.0f, 0.f));
+    vec1=rot1.getRotationDegrees();
+	result &= (vec1.equals(core::vector3df(180.0f, 360, 180.0f), 0.000002f));
+	assert(result);
+    rot1.setRotationDegrees(irr::core::vector3df(0.f, 0.f, 180.0f));
+    vec1=rot1.getRotationDegrees();
+	result &= (vec1.equals(core::vector3df(0.f, 0.f, 180.0f), 0.000002f));
+	assert(result);
+
+	rot1.makeIdentity();
+	rot1.setRotationDegrees(core::vector3df(270.f,0,0));
+	rot2.makeIdentity();
+	rot2.setRotationDegrees(core::vector3df(-90.f,0,0));
+	vec1=(rot1*rot2).getRotationDegrees();
+	result &= (vec1.equals(core::vector3df(180.f, 0.f, 0.0f)));
+	assert(result);
+
 	return result;
 }
 
@@ -219,7 +241,7 @@ bool isOrthogonal(void)
 bool matrixOps(void)
 {
 	bool result = true;
-	result &= matrices();
+	result &= identity();
 	result &= rotations();
 	result &= isOrthogonal();
 	result &= transformations();

@@ -866,7 +866,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\..\..\include\IAnimatedMeshMS3D.h"
+					RelativePath=".\..\..\include\IAnimatedMeshMD3.h"
 					>
 				</File>
 				<File
@@ -945,6 +945,11 @@
 					RelativePath=".\..\..\include\ISceneManager.h"
 					>
 				</File>
+				<File
+					RelativePath=".\..\..\include\ISceneLoader.h"
+					>
+				</File>
+
 				<File
 					RelativePath=".\..\..\include\ISceneNode.h"
 					>
@@ -2091,11 +2096,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\CSceneManager.cpp"
+				RelativePath="CSceneLoaderIrr.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CSceneManager.h"
+				RelativePath="CSceneLoaderIrr.h"
+				>
+			</File>
+			<File
+				RelativePath="CSceneManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="CSceneManager.h"
 				>
 			</File>
 			<Filter
@@ -2108,6 +2121,12 @@
 				<File
 					RelativePath=".\C3DSMeshFileLoader.h"
 					>
+				</File>
+				<File
+					RelativePath="CSMFMeshFileLoader.cpp">
+				</File>
+				<File
+					RelativePath="CSMFMeshFileLoader.h">
 				</File>
 				<File
 					RelativePath=".\CAnimatedMeshHalfLife.cpp"
@@ -3077,10 +3096,6 @@
 						>
 					</File>
 					<File
-						RelativePath="jpeglib\jchuff.h"
-						>
-					</File>
-					<File
 						RelativePath="jpeglib\jcinit.c"
 						>
 					</File>
@@ -3158,10 +3173,6 @@
 					</File>
 					<File
 						RelativePath="jpeglib\jdhuff.c"
-						>
-					</File>
-					<File
-						RelativePath="jpeglib\jdhuff.h"
 						>
 					</File>
 					<File

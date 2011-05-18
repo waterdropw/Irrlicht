@@ -151,10 +151,6 @@ private:
 			ProblemText->setVisible(true);
 		else
 			ProblemText->setVisible(false);
-
-		
-
-
 	}
 
 private:
@@ -214,7 +210,6 @@ int main()
 	// disable mouse cursor
 	device->getCursorControl()->setVisible(false);
 
-
 	/*
 	Because we want the whole scene to look a little bit scarier, we add
 	some fog to it. This is done by a call to IVideoDriver::setFog(). There
@@ -234,17 +229,14 @@ int main()
 	IMeshManipulator::makePlanarTextureMapping() method.
 	*/
 
-	scene::IAnimatedMesh* roomMesh = smgr->getMesh(
-		"../../media/room.3ds");
+	scene::IAnimatedMesh* roomMesh = smgr->getMesh("../../media/room.3ds");
 	scene::ISceneNode* room = 0;
 	scene::ISceneNode* earth = 0;
 
 	if (roomMesh)
 	{
-		/*
-			The Room Mesh doesn't have proper Texture Mapping on the floor,
-			so we can recreate them on runtime
-		*/
+		// The Room mesh doesn't have proper Texture Mapping on the
+		// floor, so we can recreate them on runtime
 		smgr->getMeshManipulator()->makePlanarTextureMapping(
 				roomMesh->getMesh(0), 0.003f);
 
@@ -336,7 +328,7 @@ int main()
 		// scale the mesh by factor 50
 		core::matrix4 m;
 		m.setScale ( core::vector3df(50,50,50) );
-		manipulator->transformMesh( tangentSphereMesh, m );
+		manipulator->transform( tangentSphereMesh, m );
 
 		earth = smgr->addMeshSceneNode(tangentSphereMesh);
 
@@ -407,7 +399,7 @@ int main()
 	walls. But of course, this will change in future versions of Irrlicht
 	where higher versions of pixel/vertex shaders will be implemented too.
 	*/
-#if 0
+
 	// add light 2 (red)
 	scene::ISceneNode* light2 =
 		smgr->addLightSceneNode(0, core::vector3df(0,0,0),
@@ -435,7 +427,7 @@ int main()
 		core::aabbox3d<f32>(-3,0,-3,3,1,3),
 		core::vector3df(0.0f,0.03f,0.0f),
 		80,100,
-		video::SColor(0,255,255,255), video::SColor(0,255,255,255),
+		video::SColor(10,255,255,255), video::SColor(10,255,255,255),
 		400,1100);
 	em->setMinStartSize(core::dimension2d<f32>(30.0f, 40.0f));
 	em->setMaxStartSize(core::dimension2d<f32>(30.0f, 40.0f));
@@ -452,8 +444,7 @@ int main()
 	ps->setMaterialFlag(video::EMF_LIGHTING, false);
 	ps->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
 	ps->setMaterialTexture(0, driver->getTexture("../../media/fireball.bmp"));
-	ps->setMaterialType(video::EMT_TRANSPARENT_VERTEX_ALPHA);
-#endif
+	ps->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
 
 	MyEventReceiver receiver(room, earth, env, driver);
 	device->setEventReceiver(&receiver);

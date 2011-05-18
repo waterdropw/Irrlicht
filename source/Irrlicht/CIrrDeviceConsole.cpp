@@ -1,4 +1,4 @@
-// Copyright (C) 2009 Gaz Davidson
+// Copyright (C) 2009-2011 Gaz Davidson
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -77,11 +77,14 @@ CIrrDeviceConsole::CIrrDeviceConsole(const SIrrlichtCreationParameters& params)
 
 	if (CreationParams.Fullscreen)
 	{
+// Some mingw versions lack this define, so avoid it in case it does not exist
+#if (_WIN32_WINNT >= 0x0501) && defined(CONSOLE_FULLSCREEN_MODE)
 		if (SetConsoleDisplayMode(WindowsSTDOut, CONSOLE_FULLSCREEN_MODE, Dimensions))
 		{
 			CreationParams.WindowSize.Width = Dimensions->X;
 			CreationParams.WindowSize.Width = Dimensions->Y;
 		}
+#endif
 	}
 	else
 	{

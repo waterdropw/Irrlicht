@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2011 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -25,6 +25,7 @@ namespace irr
 namespace io
 {
 	class IAttributes;
+	struct SAttributeReadWriteOptions;
 	class IReadFile;
 	class IWriteFile;
 } // end namespace io
@@ -84,11 +85,11 @@ namespace video
 		ETS_COUNT
 	};
 
-	//! enumeration for signalling ressources which were lost after the last render cycle
-	/** These values can be signalled by the driver, telling the app that some ressources
+	//! enumeration for signaling resources which were lost after the last render cycle
+	/** These values can be signaled by the driver, telling the app that some resources
 	were lost and need to be recreated. Irrlicht will sometimes recreate the actual objects,
 	but the content needs to be recreated by the application. */
-	enum E_LOST_RESSOURCE
+	enum E_LOST_RESOURCE
 	{
 		//! The whole device/driver is lost
 		ELR_DEVICE = 1,
@@ -208,26 +209,35 @@ namespace video
 				E_COLOR_PLANE colorMask=ECP_ALL,
 				E_BLEND_FACTOR blendFuncSrc=EBF_ONE,
 				E_BLEND_FACTOR blendFuncDst=EBF_ONE_MINUS_SRC_ALPHA,
-				bool blendEnable=false) :
+				E_BLEND_OPERATION blendOp=EBO_NONE) :
 			RenderTexture(texture),
 			TargetType(ERT_RENDER_TEXTURE), ColorMask(colorMask),
 			BlendFuncSrc(blendFuncSrc), BlendFuncDst(blendFuncDst),
-			BlendEnable(blendEnable) {}
+			BlendOp(blendOp) {}
 		IRenderTarget(E_RENDER_TARGET target,
 				E_COLOR_PLANE colorMask=ECP_ALL,
 				E_BLEND_FACTOR blendFuncSrc=EBF_ONE,
 				E_BLEND_FACTOR blendFuncDst=EBF_ONE_MINUS_SRC_ALPHA,
-				bool blendEnable=false) :
+				E_BLEND_OPERATION blendOp=EBO_NONE) :
 			RenderTexture(0),
 			TargetType(target), ColorMask(colorMask),
 			BlendFuncSrc(blendFuncSrc), BlendFuncDst(blendFuncDst),
-			BlendEnable(blendEnable) {}
+			BlendOp(blendOp) {}
+		bool operator!=(const IRenderTarget& other) const
+		{
+			return ((RenderTexture != other.RenderTexture) ||
+				(TargetType != other.TargetType) ||
+				(ColorMask != other.ColorMask) ||
+				(BlendFuncSrc != other.BlendFuncSrc) ||
+				(BlendFuncDst != other.BlendFuncDst) ||
+				(BlendOp != other.BlendOp));
+		}
 		ITexture* RenderTexture;
 		E_RENDER_TARGET TargetType:8;
 		E_COLOR_PLANE ColorMask:8;
 		E_BLEND_FACTOR BlendFuncSrc:4;
 		E_BLEND_FACTOR BlendFuncDst:4;
-		bool BlendEnable;
+		E_BLEND_OPERATION BlendOp:4;
 	};
 
 	//! Interface to driver which is able to perform 2d and 3d graphics functions.
@@ -284,6 +294,25 @@ namespace video
 		\param flag When true the feature is disabled, otherwise it is enabled. */
 		virtual void disableFeature(E_VIDEO_DRIVER_FEATURE feature, bool flag=true) =0;
 
+		//! Get attributes of the actual video driver
+		/** The following names can be queried for the given types:
+		MaxTextures (int) The maximum number of simultaneous textures supported by the driver. This can be less than the supported number of textures of the driver. Use _IRR_MATERIAL_MAX_TEXTURES_ to adapt the number.
+		MaxSupportedTextures (int) The maximum number of simultaneous textures supported by the fixed function pipeline of the (hw) driver. The actual supported number of textures supported by the engine can be lower.
+		MaxLights (int) Number of hardware lights supported in the fixed function pipieline of the driver, typically 6-8. Use light manager or deferred shading for more.
+		MaxAnisotropy (int) Number of anisotropy levels supported for filtering. At least 1, max is typically at 16 or 32.
+		MaxUserClipPlanes (int) Number of additional clip planes, which can be set by the user via dedicated driver methods.
+		MaxAuxBuffers (int) Special render buffers, which are currently not really usable inside Irrlicht. Only supported by OpenGL
+		MaxMultipleRenderTargets (int) Number of render targets which can be bound simultaneously. Rendering to MRTs is done via shaders.
+		MaxIndices (int) Number of indices which can be used in one render call (i.e. one mesh buffer).
+		MaxTextureSize (int) Dimension that a texture may have, both in width and height.
+		MaxGeometryVerticesOut (int) Number of vertices the geometry shader can output in one pass. Only OpenGL so far.
+		MaxTextureLODBias (float) Maximum value for LOD bias. Is usually at around 16, but can be lower on some systems.
+		Version (int) Version of the driver. Should be Major*100+Minor
+		ShaderLanguageVersion (int) Version of the high level shader language. Should be Major*100+Minor.
+		AntiAlias (int) Number of Samples the driver uses for each pixel. 0 and 1 means anti aliasing is off, typical values are 2,4,8,16,32
+		*/
+		virtual const io::IAttributes& getDriverAttributes() const=0;
+
 		//! Check if the driver was recently reset.
 		/** For d3d devices you will need to recreate the RTTs if the
 		driver was reset. Should be queried right after beginScene().
@@ -308,7 +337,7 @@ namespace video
 		//! Retrieve the given image loader
 		/** \param n The index of the loader to retrieve. This parameter is an 0-based
 		array index.
-		\return A pointer to the specified loader, 0 if the index is uncorrect. */
+		\return A pointer to the specified loader, 0 if the index is incorrect. */
 		virtual IImageLoader* getImageLoader(u32 n) = 0;
 
 		//! Retrieve the number of image writers
@@ -318,7 +347,7 @@ namespace video
 		//! Retrieve the given image writer
 		/** \param n The index of the writer to retrieve. This parameter is an 0-based
 		array index.
-		\return A pointer to the specified writer, 0 if the index is uncorrect. */
+		\return A pointer to the specified writer, 0 if the index is incorrect. */
 		virtual IImageWriter* getImageWriter(u32 n) = 0;
 
 		//! Sets a material.
@@ -434,7 +463,7 @@ namespace video
 
 		//! Create occlusion query.
 		/** Use node for identification and mesh for occlusion test. */
-		virtual void createOcclusionQuery(scene::ISceneNode* node,
+		virtual void addOcclusionQuery(scene::ISceneNode* node,
 				const scene::IMesh* mesh=0) =0;
 
 		//! Remove occlusion query.
@@ -484,7 +513,8 @@ namespace video
 		\param zeroTexels \deprecated If set to true, then any texels that match
 		the color key will have their color, as well as their alpha, set to zero
 		(i.e. black). This behaviour matches the legacy (buggy) behaviour prior
-		to release 1.5 and is provided for backwards compatibility only.*/
+		to release 1.5 and is provided for backwards compatibility only. 
+		This parameter may be removed by Irrlicht 1.9. */
 		virtual void makeColorKeyTexture(video::ITexture* texture,
 						video::SColor color,
 						bool zeroTexels = false) const =0;
@@ -500,7 +530,8 @@ namespace video
 		\param zeroTexels \deprecated If set to true, then any texels that match
 		the color key will have their color, as well as their alpha, set to zero
 		(i.e. black). This behaviour matches the legacy (buggy) behaviour prior
-		to release 1.5 and is provided for backwards compatibility only.*/
+		to release 1.5 and is provided for backwards compatibility only.
+		This parameter may be removed by Irrlicht 1.9. */
 		virtual void makeColorKeyTexture(video::ITexture* texture,
 				core::position2d<s32> colorKeyPixelPos,
 				bool zeroTexels = false) const =0;
@@ -1183,23 +1214,23 @@ namespace video
 		virtual IImage* createImage(ECOLOR_FORMAT format, const core::dimension2d<u32>& size) =0;
 
 		//! Creates a software image by converting it to given format from another image.
-		/** \deprecated Create an empty image and use copyTo()
+		/** \deprecated Create an empty image and use copyTo(). This method may be removed by Irrlicht 1.9.
 		\param format Desired color format of the image.
 		\param imageToCopy Image to copy to the new image.
 		\return The created image.
 		If you no longer need the image, you should call IImage::drop().
 		See IReferenceCounted::drop() for more information. */
-		virtual IImage* createImage(ECOLOR_FORMAT format, IImage *imageToCopy) =0;
+		_IRR_DEPRECATED_ virtual IImage* createImage(ECOLOR_FORMAT format, IImage *imageToCopy) =0;
 
 		//! Creates a software image from a part of another image.
-		/** \deprecated Create an empty image and use copyTo()
+		/** \deprecated Create an empty image and use copyTo(). This method may be removed by Irrlicht 1.9.
 		\param imageToCopy Image to copy to the new image in part.
 		\param pos Position of rectangle to copy.
 		\param size Extents of rectangle to copy.
 		\return The created image.
 		If you no longer need the image, you should call IImage::drop().
 		See IReferenceCounted::drop() for more information. */
-		virtual IImage* createImage(IImage* imageToCopy,
+		_IRR_DEPRECATED_ virtual IImage* createImage(IImage* imageToCopy,
 				const core::position2d<s32>& pos,
 				const core::dimension2d<u32>& size) =0;
 
@@ -1280,9 +1311,12 @@ namespace video
 		renderer names from getMaterialRendererName() to write out the
 		material type name, so they should be set before.
 		\param material The material to serialize.
+		\param options Additional options which might influence the
+		serialization.
 		\return The io::IAttributes container holding the material
 		properties. */
-		virtual io::IAttributes* createAttributesFromMaterial(const video::SMaterial& material) =0;
+		virtual io::IAttributes* createAttributesFromMaterial(const video::SMaterial& material,
+			io::SAttributeReadWriteOptions* options=0) =0;
 
 		//! Fills an SMaterial structure from attributes.
 		/** Please note that for setting material types of the
@@ -1421,4 +1455,3 @@ namespace video
 
 
 #endif
-

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2011 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -108,6 +108,12 @@ namespace video
 
 		//! Supports occlusion queries
 		EVDF_OCCLUSION_QUERY,
+
+		//! Supports polygon offset/depth bias for avoiding z-fighting
+		EVDF_POLYGON_OFFSET,
+
+		//! Support for different blend functions. Without, only ADD is available
+		EVDF_BLEND_OPERATIONS,
 
 		//! Only used for counting the elements of this enum
 		EVDF_COUNT

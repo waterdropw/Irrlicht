@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2011 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -61,6 +61,12 @@ namespace gui
 		//! Checks if an override color is enabled
 		virtual bool isOverrideColorEnabled() const;
 
+		//! Set whether the text in this label should be clipped if it goes outside bounds
+		virtual void setTextRestrainedInside(bool restrainedInside);
+		
+		//! Checks if the text in this label should be clipped if it goes outside bounds
+		virtual bool isTextRestrainedInside() const;
+
 		//! Enables or disables word wrap for using the static text as
 		//! multiline text control.
 		virtual void setWordWrap(bool enable);
@@ -80,6 +86,17 @@ namespace gui
 		//! Updates the absolute position, splits text if word wrap is enabled
 		virtual void updateAbsolutePosition();
 
+		//! Set whether the string should be interpreted as right-to-left (RTL) text
+		/** \note This component does not implement the Unicode bidi standard, the
+		text of the component should be already RTL if you call this. The
+		main difference when RTL is enabled is that the linebreaks for multiline
+		elements are performed starting from the end.
+		*/
+		virtual void setRightToLeft(bool rtl);
+
+		//! Checks if the text should be interpreted as right-to-left text
+		virtual bool isRightToLeft() const;
+
 		//! Writes attributes of the element.
 		virtual void serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options) const;
 
@@ -97,6 +114,8 @@ namespace gui
 		bool OverrideBGColorEnabled;
 		bool WordWrap;
 		bool Background;
+		bool RestrainTextInside;
+		bool RightToLeft;
 
 		video::SColor OverrideColor, BGColor;
 		gui::IGUIFont* OverrideFont;

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2011 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -24,6 +24,7 @@
 #include "irrArray.h"
 #include "IXMLReader.h"
 #include "EAttributes.h"
+#include "path.h"
 
 namespace irr
 {
@@ -67,7 +68,7 @@ public:
 	virtual bool existsAttribute(const c8* attributeName) = 0;
 
 	//! Returns attribute index from name, -1 if not found
-	virtual s32 findAttribute(const c8* attributeName) = 0;
+	virtual s32 findAttribute(const c8* attributeName) const =0;
 
 	//! Removes all attributes
 	virtual void clear() = 0;
@@ -102,11 +103,11 @@ public:
 	//! Gets an attribute as integer value
 	//! \param attributeName: Name of the attribute to get.
 	//! \return Returns value of the attribute previously set by setAttribute()
-	virtual s32 getAttributeAsInt(const c8* attributeName) = 0;
+	virtual s32 getAttributeAsInt(const c8* attributeName) const =0;
 
 	//! Gets an attribute as integer value
 	//! \param index: Index value, must be between 0 and getAttributeCount()-1.
-	virtual s32 getAttributeAsInt(s32 index) = 0;
+	virtual s32 getAttributeAsInt(s32 index) const =0;
 
 	//! Sets an attribute as integer value
 	virtual void setAttribute(s32 index, s32 value) = 0;
@@ -636,10 +637,10 @@ public:
 	*/
 
 	//! Adds an attribute as texture reference
-	virtual void addTexture(const c8* attributeName, video::ITexture* texture) = 0;
+	virtual void addTexture(const c8* attributeName, video::ITexture* texture, const io::path& filename = "") = 0;
 
 	//! Sets an attribute as texture reference
-	virtual void setAttribute(const c8* attributeName, video::ITexture* texture ) = 0;
+	virtual void setAttribute(const c8* attributeName, video::ITexture* texture, const io::path& filename = "") = 0;
 
 	//! Gets an attribute as texture reference
 	//! \param attributeName: Name of the attribute to get.
@@ -650,7 +651,7 @@ public:
 	virtual video::ITexture* getAttributeAsTexture(s32 index) = 0;
 
 	//! Sets an attribute as texture reference
-	virtual void setAttribute(s32 index, video::ITexture* texture) = 0;
+	virtual void setAttribute(s32 index, video::ITexture* texture, const io::path& filename = "") = 0;
 
 
 	/*

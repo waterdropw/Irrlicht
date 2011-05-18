@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt / Thomas Alten
+// Copyright (C) 2002-2011 Nikolaus Gebhardt / Thomas Alten
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -88,6 +88,11 @@ namespace video
 		virtual void draw2DImage(const video::ITexture* texture, const core::position2d<s32>& destPos,
 			const core::rect<s32>& sourceRect, const core::rect<s32>* clipRect = 0,
 			SColor color=SColor(255,255,255,255), bool useAlphaChannelOfTexture=false);
+
+	//! Draws a part of the texture into the rectangle.
+		virtual void draw2DImage(const video::ITexture* texture, const core::rect<s32>& destRect,
+				const core::rect<s32>& sourceRect, const core::rect<s32>* clipRect = 0,
+				const video::SColor* const colors=0, bool useAlphaChannelOfTexture=false);
 
 		//! Draws a 3d line.
 		virtual void draw3DLine(const core::vector3df& start,

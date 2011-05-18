@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2009 Colin MacDonald
+// Copyright (C) 2008-2011 Colin MacDonald
 // No rights reserved: this software is in the public domain.
 
 #include "testUtils.h"
@@ -56,7 +56,7 @@ static bool drawScaledOctree(void)
 	video::IVideoDriver* driver = device->getVideoDriver();
 	ISceneManager * smgr = device->getSceneManager();
 
-	bool added = device->getFileSystem()->addZipFileArchive("../media/map-20kdm2.pk3");
+	bool added = device->getFileSystem()->addFileArchive("../media/map-20kdm2.pk3");
 	assert(added);
 
 	if(added)
@@ -80,6 +80,8 @@ static bool drawScaledOctree(void)
 		}
 	}
 
+	device->closeDevice();
+	device->run();
 	device->drop();
 
 	return result;

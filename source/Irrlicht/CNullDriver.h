@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2011 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -21,6 +21,10 @@
 #include "SVertexIndex.h"
 #include "SLight.h"
 #include "SExposedVideoData.h"
+
+#ifdef _MSC_VER
+#pragma warning( disable: 4996)
+#endif
 
 namespace irr
 {
@@ -56,6 +60,9 @@ namespace video
 
 		//! queries the features of the driver, returns true if feature is available
 		virtual bool queryFeature(E_VIDEO_DRIVER_FEATURE feature) const;
+
+		//! Get attributes of the actual video driver
+		const io::IAttributes& getDriverAttributes() const;
 
 		//! sets transformation
 		virtual void setTransform(E_TRANSFORMATION_STATE state, const core::matrix4& mat);
@@ -421,7 +428,7 @@ namespace video
 
 		//! Create occlusion query.
 		/** Use node for identification and mesh for occlusion test. */
-		virtual void createOcclusionQuery(scene::ISceneNode* node,
+		virtual void addOcclusionQuery(scene::ISceneNode* node,
 				const scene::IMesh* mesh=0);
 
 		//! Remove occlusion query.
@@ -585,7 +592,8 @@ namespace video
 		virtual void setMaterialRendererName(s32 idx, const char* name);
 
 		//! Creates material attributes list from a material, usable for serialization and more.
-		virtual io::IAttributes* createAttributesFromMaterial(const video::SMaterial& material);
+		virtual io::IAttributes* createAttributesFromMaterial(const video::SMaterial& material,
+			io::SAttributeReadWriteOptions* options=0);
 
 		//! Fills an SMaterial structure from attributes.
 		virtual void fillMaterialStructureFromAttributes(video::SMaterial& outMaterial, io::IAttributes* attributes);
@@ -717,7 +725,7 @@ namespace video
 		{
 			SDummyTexture(const io::path& name) : ITexture(name), size(0,0) {};
 
-			virtual void* lock(bool readOnly = false, u32 mipmapLevel=0) { return 0; };
+			virtual void* lock(E_TEXTURE_LOCK_MODE mode=ETLM_READ_WRITE, u32 mipmapLevel=0) { return 0; };
 			virtual void unlock(){}
 			virtual const core::dimension2d<u32>& getOriginalSize() const { return size; }
 			virtual const core::dimension2d<u32>& getSize() const { return size; }
@@ -815,6 +823,8 @@ namespace video
 		f32 FogDensity;
 		SColor FogColor;
 		SExposedVideoData ExposedData;
+
+		io::IAttributes* DriverAttributes;
 
 		SOverrideMaterial OverrideMaterial;
 		SMaterial OverrideMaterial2D;

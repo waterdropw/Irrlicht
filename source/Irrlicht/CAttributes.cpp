@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2011 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -230,7 +230,7 @@ void CAttributes::setAttribute(s32 index, const core::array<core::stringw>& valu
 
 
 //! Returns attribute index from name, -1 if not found
-s32 CAttributes::findAttribute(const c8* attributeName)
+s32 CAttributes::findAttribute(const c8* attributeName) const
 {
 	for (u32 i=0; i<Attributes.size(); ++i)
 		if (Attributes[i]->Name == attributeName)
@@ -240,7 +240,7 @@ s32 CAttributes::findAttribute(const c8* attributeName)
 }
 
 
-IAttribute* CAttributes::getAttributeP(const c8* attributeName)
+IAttribute* CAttributes::getAttributeP(const c8* attributeName) const
 {
 	for (u32 i=0; i<Attributes.size(); ++i)
 		if (Attributes[i]->Name == attributeName)
@@ -294,7 +294,7 @@ void CAttributes::setAttribute(const c8* attributeName, s32 value)
 //! \param attributeName: Name of the attribute to get.
 //! \return Returns value of the attribute previously set by setAttribute() as integer
 //! or 0 if attribute is not set.
-s32 CAttributes::getAttributeAsInt(const c8* attributeName)
+s32 CAttributes::getAttributeAsInt(const c8* attributeName) const
 {
 	IAttribute* att = getAttributeP(attributeName);
 	if (att)
@@ -509,13 +509,13 @@ void CAttributes::getAttributeEnumerationLiteralsOfEnumeration(const c8* attribu
 }
 
 //! Sets an attribute as texture reference
-void CAttributes::setAttribute(const c8* attributeName, video::ITexture* value )
+void CAttributes::setAttribute(const c8* attributeName, video::ITexture* value, const io::path& filename)
 {
 	IAttribute* att = getAttributeP(attributeName);
 	if (att)
-		att->setTexture(value);
+		att->setTexture(value, filename);
 	else
-		Attributes.push_back(new CTextureAttribute(attributeName, value, Driver));
+		Attributes.push_back(new CTextureAttribute(attributeName, value, Driver, filename));
 }
 
 
@@ -614,7 +614,7 @@ bool CAttributes::getAttributeAsBool(s32 index)
 
 //! Gets an attribute as integer value
 //! \param index: Index value, must be between 0 and getAttributeCount()-1.
-s32 CAttributes::getAttributeAsInt(s32 index)
+s32 CAttributes::getAttributeAsInt(s32 index) const
 {
 	if ((u32)index < Attributes.size())
 		return Attributes[index]->getInt();
@@ -818,9 +818,9 @@ void CAttributes::addBinary(const c8* attributeName, void* data, s32 dataSizeInB
 }
 
 //! Adds an attribute as texture reference
-void CAttributes::addTexture(const c8* attributeName, video::ITexture* texture)
+void CAttributes::addTexture(const c8* attributeName, video::ITexture* texture, const io::path& filename)
 {
-	Attributes.push_back(new CTextureAttribute(attributeName, texture, Driver));
+	Attributes.push_back(new CTextureAttribute(attributeName, texture, Driver, filename));
 }
 
 //! Returns if an attribute with a name exists
@@ -918,10 +918,10 @@ void CAttributes::setAttribute(s32 index, const char* enumValue, const char* con
 
 
 //! Sets an attribute as texture reference
-void CAttributes::setAttribute(s32 index, video::ITexture* texture)
+void CAttributes::setAttribute(s32 index, video::ITexture* texture, const io::path& filename)
 {
 	if ((u32)index < Attributes.size())
-		Attributes[index]->setTexture(texture);
+		Attributes[index]->setTexture(texture, filename);
 }
 
 

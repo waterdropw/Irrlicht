@@ -24,8 +24,8 @@ bool terrainSceneNode(void)
 
     ICameraSceneNode* camera = smgr->addCameraSceneNode();
 
-    const core::vector3df center (terrain->getBoundingBox().getCenter());
-    camera->setTarget (center);
+    const core::vector3df center(terrain->getBoundingBox().getCenter());
+    camera->setTarget(center);
 
     // yes, Y is intentionally being set to X here
     const core::vector3df above (center.X, center.X, center.Z);
@@ -45,13 +45,11 @@ bool terrainSceneNode(void)
 	driver->endScene();
 
 	// Note that this has to be a slightly fuzzier than usual compare to satisfy multiple OpenGL environments
-	bool result = takeScreenshotAndCompareAgainstReference(driver, "-terrainSceneNode-1.png", 98.22f);
+	bool result = takeScreenshotAndCompareAgainstReference(driver, "-terrainSceneNode-1.png", 97.98f);
 	if(!result)
 	{
 		logTestString("Small camera up rotation caused bad recalc.\n");
-		assert(false);
 	}
-
 
 	// This is big enough to cause a recalc
 	camera->setUpVector(vector3df(1.f, 0.f, .1f).normalize());
@@ -60,13 +58,14 @@ bool terrainSceneNode(void)
 	smgr->drawAll();
 	driver->endScene();
 
-	result &= takeScreenshotAndCompareAgainstReference(driver, "-terrainSceneNode-2.png", 98.83f);
+	result &= takeScreenshotAndCompareAgainstReference(driver, "-terrainSceneNode-2.png", 98.38f);
 	if(!result)
 	{
 		logTestString("Large camera up rotation caused bad recalc.\n");
-		assert(false);
 	}
 
-    device->drop();
+	device->closeDevice();
+	device->run();
+	device->drop();
     return result;
 }

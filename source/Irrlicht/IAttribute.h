@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2011 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -92,7 +92,7 @@ public:
 	virtual void setUserPointer(void* v)	{};
 
 	virtual void setEnum(const char* enumValue, const char* const* enumerationLiterals) {};
-	virtual void setTexture(video::ITexture*)	{};
+	virtual void setTexture(video::ITexture*, const path& filename)	{};
 
 	core::stringc Name;
 

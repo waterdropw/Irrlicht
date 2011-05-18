@@ -1,5 +1,5 @@
 
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2011 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -54,7 +54,7 @@ const wchar_t* IRR_XML_FORMAT_GUI_ELEMENT_ATTR_TYPE	= L"type";
 
 //! constructor
 CGUIEnvironment::CGUIEnvironment(io::IFileSystem* fs, video::IVideoDriver* driver, IOSOperator* op)
-: IGUIElement(EGUIET_ELEMENT, 0, 0, 0, core::rect<s32>(core::position2d<s32>(0,0), driver ? core::dimension2d<s32>(driver->getScreenSize()) : core::dimension2d<s32>(0,0))),
+: IGUIElement(EGUIET_ROOT, 0, 0, 0, core::rect<s32>(core::position2d<s32>(0,0), driver ? core::dimension2d<s32>(driver->getScreenSize()) : core::dimension2d<s32>(0,0))),
 	Driver(driver), Hovered(0), HoveredNoSubelement(0), Focus(0), LastHoveredMousePos(0,0), CurrentSkin(0),
 	FileSystem(fs), UserReceiver(0), Operator(op)
 {
@@ -696,8 +696,9 @@ IGUIElement* CGUIEnvironment::addGUIElement(const c8* elementName, IGUIElement* 
 	if (!parent)
 		parent = this;
 
-	for (u32 i=0; i<GUIElementFactoryList.size() && !node; ++i)
+	for (s32 i=GUIElementFactoryList.size()-1; i>=0 && !node; --i)
 		node = GUIElementFactoryList[i]->addGUIElement(elementName, parent);
+
 
 	return node;
 }
@@ -1481,6 +1482,21 @@ IGUIFont* CGUIEnvironment::addFont(const io::path& name, IGUIFont* font)
 	return font;
 }
 
+//! remove loaded font
+void CGUIEnvironment::removeFont(IGUIFont* font)
+{
+	if ( !font )
+		return;
+	for ( u32 i=0; i<Fonts.size(); ++i )
+	{
+		if ( Fonts[i].Font == font )
+		{
+			Fonts[i].Font->drop();
+			Fonts.erase(i);
+			return;
+		}
+	}
+}
 
 //! returns default font
 IGUIFont* CGUIEnvironment::getBuiltInFont() const
@@ -1504,10 +1520,9 @@ IGUISpriteBank* CGUIEnvironment::getSpriteBank(const io::path& filename)
 		return Banks[index].Bank;
 
 	// we don't have this sprite bank, we should load it
-
 	if (!FileSystem->existFile(b.NamedPath.getPath()))
 	{
-		os::Printer::log("Could not load sprite bank because the file does not exist", b.NamedPath.getPath(), ELL_ERROR);
+		os::Printer::log("Could not load sprite bank because the file does not exist", b.NamedPath.getPath(), ELL_DEBUG);
 		return 0;
 	}
 

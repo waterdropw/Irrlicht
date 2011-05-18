@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2011 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -209,6 +209,7 @@ IImage* CImageLoaderJPG::loadImage(io::IReadFile* file) const
 		cinfo.out_color_space=JCS_RGB;
 		cinfo.out_color_components=3;
 	}
+	cinfo.output_gamma=2.2;
 	cinfo.do_fancy_upsampling=FALSE;
 
 	// Start decompressor
