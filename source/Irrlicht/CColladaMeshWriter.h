@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2011 Nikolaus Gebhardt
+// Copyright (C) 2002-2012 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -96,6 +96,9 @@ public:
 	// Restrict the characters of oldString a set of allowed characters in xs::NCName and add the prefix.
 	virtual irr::core::stringw toNCName(const irr::core::stringw& oldString, const irr::core::stringw& prefix=irr::core::stringw(L"_NC_")) const;
 
+	//! After export you can find out which name had been used for writing the geometry for this node.
+	virtual const irr::core::stringw* findGeometryNameForNode(ISceneNode* node);
+
 protected:
 
 	void reset();
@@ -149,6 +152,7 @@ protected:
 	void writeRotateElement(const irr::core::vector3df& axis, irr::f32 angle);
 	void writeScaleElement(const irr::core::vector3df& scale);
 	void writeTranslateElement(const irr::core::vector3df& translate);
+	void writeLookAtElement(const irr::core::vector3df& eyePos, const irr::core::vector3df& targetPos, const irr::core::vector3df& upVector);
 	void writeMatrixElement(const irr::core::matrix4& matrix);
 
 	struct SComponentGlobalStartPos

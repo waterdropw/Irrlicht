@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2011 Nikolaus Gebhardt
+// Copyright (C) 2002-2012 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -63,31 +63,26 @@ public:
 	{
 	}
 
-	~CD3D9MaterialRenderer()
+	virtual s32 getVariableID(bool vertexShader, const c8* name)
 	{
+		os::Printer::log("Invalid material to set variable in.");
+		return -1;
 	}
 
 	//! sets a variable in the shader.
 	//! \param vertexShader: True if this should be set in the vertex shader, false if
 	//! in the pixel shader.
-	//! \param name: Name of the variable
+	//! \param index: Index of the variable
 	//! \param floats: Pointer to array of floats
 	//! \param count: Amount of floats in array.
-	virtual bool setVariable(bool vertexShader, const c8* name, const f32* floats, int count)
-	{
-		os::Printer::log("Invalid material to set variable in.");
-		return false;
-	}
-
-	//! Bool interface for the above.
-	virtual bool setVariable(bool vertexShader, const c8* name, const bool* bools, int count)
+	virtual bool setVariable(bool vertexShader, s32 index, const f32* floats, int count)
 	{
 		os::Printer::log("Invalid material to set variable in.");
 		return false;
 	}
 
 	//! Int interface for the above.
-	virtual bool setVariable(bool vertexShader, const c8* name, const s32* ints, int count)
+	virtual bool setVariable(bool vertexShader, s32 index, const s32* ints, int count)
 	{
 		os::Printer::log("Invalid material to set variable in.");
 		return false;

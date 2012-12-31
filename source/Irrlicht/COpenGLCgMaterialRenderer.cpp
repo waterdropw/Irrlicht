@@ -1,4 +1,4 @@
-// Copyright (C) 2011-2012 Patryk Nadrowski
+// Copyright (C) 2012-2012 Patryk Nadrowski
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -99,14 +99,13 @@ void COpenGLCgMaterialRenderer::OnSetMaterial(const SMaterial& material, const S
 	if (CallBack)
 		CallBack->OnSetMaterial(material);
 
-	for (u32 i=0; i<MATERIAL_MAX_TEXTURES; ++i)
-		Driver->setActiveTexture(i, material.getTexture(i));
-
 	Driver->setBasicRenderStates(material, lastMaterial, resetAllRenderstates);
 }
 
 bool COpenGLCgMaterialRenderer::OnRender(IMaterialRendererServices* services, E_VERTEX_TYPE vtxtype)
 {
+    Driver->setTextureRenderStates(Driver->getCurrentMaterial(), false, false);
+
 	if (CallBack && (VertexProgram || FragmentProgram || GeometryProgram))
 		CallBack->OnSetConstants(this, UserData);
 

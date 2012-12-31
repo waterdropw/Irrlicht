@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2011 Nikolaus Gebhardt
+// Copyright (C) 2002-2012 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -315,8 +315,10 @@ void COpenGLTexture::uploadTexture(bool newTexture, void* mipmapData, u32 level)
 	// make sure we don't change the internal format of existing images
 	if (!newTexture)
 		InternalFormat=oldInternalFormat;
+        
+    Driver->setActiveTexture(0, this);
+	Driver->getBridgeCalls()->setTexture(0, true);
 
-	Driver->setActiveTexture(0, this);
 	if (Driver->testGLError())
 		os::Printer::log("Could not bind Texture", ELL_ERROR);
 
@@ -358,6 +360,10 @@ void COpenGLTexture::uploadTexture(bool newTexture, void* mipmapData, u32 level)
 			// enable bilinear mipmap filter
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            
+            StatesCache.BilinearFilter = true;
+            StatesCache.TrilinearFilter = false;
+            StatesCache.MipMapStatus = true;
 		}
 		else
 #else
@@ -368,6 +374,10 @@ void COpenGLTexture::uploadTexture(bool newTexture, void* mipmapData, u32 level)
 			// enable bilinear filter without mipmaps
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            
+            StatesCache.BilinearFilter = true;
+            StatesCache.TrilinearFilter = false;
+            StatesCache.MipMapStatus = false;
 		}
 	}
 
@@ -651,9 +661,17 @@ void COpenGLTexture::bindRTT()
 void COpenGLTexture::unbindRTT()
 {
 	Driver->setActiveTexture(0, this);
+	Driver->getBridgeCalls()->setTexture(0, true);
 
 	// Copy Our ViewPort To The Texture
 	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, getSize().Width, getSize().Height);
+}
+
+
+//! Get an access to texture states cache.
+COpenGLTexture::SStatesCache& COpenGLTexture::getStatesCache() const
+{
+	return StatesCache;
 }
 
 
@@ -693,10 +711,22 @@ COpenGLFBOTexture::COpenGLFBOTexture(const core::dimension2d<u32>& size,
 
 	// generate color texture
 	glGenTextures(1, &TextureName);
-	Driver->setActiveTexture(0, this);
+    
+    Driver->setActiveTexture(0, this);
+	Driver->getBridgeCalls()->setTexture(0, true);
+    
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, FilteringType);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    
+    if(FilteringType == GL_NEAREST)
+        StatesCache.BilinearFilter = false;
+    else
+        StatesCache.BilinearFilter = true;
+        
+    StatesCache.WrapU = ETC_CLAMP_TO_EDGE;
+    StatesCache.WrapV = ETC_CLAMP_TO_EDGE;
+            
 	glTexImage2D(GL_TEXTURE_2D, 0, InternalFormat, ImageSize.Width,
 		ImageSize.Height, 0, PixelFormat, PixelType, 0);
 #ifdef _DEBUG
@@ -797,7 +827,7 @@ COpenGLFBODepthTexture::COpenGLFBODepthTexture(
 #endif
 		{
 			// generate depth texture
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, ImageSize.Width,
+			glTexImage2D(GL_TEXTURE_2D, 0, Driver->getZBufferBits(), ImageSize.Width,
 				ImageSize.Height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
 
 			// generate stencil texture
@@ -817,7 +847,7 @@ COpenGLFBODepthTexture::COpenGLFBODepthTexture(
 		Driver->extGlGenRenderbuffers(1, &DepthRenderBuffer);
 		Driver->extGlBindRenderbuffer(GL_RENDERBUFFER_EXT, DepthRenderBuffer);
 		Driver->extGlRenderbufferStorage(GL_RENDERBUFFER_EXT,
-				GL_DEPTH_COMPONENT, ImageSize.Width,
+				Driver->getZBufferBits(), ImageSize.Width,
 				ImageSize.Height);
 	}
 #endif

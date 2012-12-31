@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2011 Nikolaus Gebhardt
+// Copyright (C) 2002-2012 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -175,7 +175,7 @@ namespace irr
 			EMOUSE_INPUT_EVENT LastMouseInputEvent;
 		};
 		SMouseMultiClicks MouseMultiClicks;
-		video::CVideoModeList VideoModeList;
+		video::CVideoModeList* VideoModeList;
 		SIrrlichtCreationParameters CreationParams;
 		bool Close;
 	};

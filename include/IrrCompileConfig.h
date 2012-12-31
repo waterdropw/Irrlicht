@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2011 Nikolaus Gebhardt
+// Copyright (C) 2002-2012 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -11,8 +11,8 @@
 #define IRRLICHT_VERSION_REVISION 0
 // This flag will be defined only in SVN, the official release code will have
 // it undefined
-#define IRRLICHT_VERSION_SVN -alpha
-#define IRRLICHT_SDK_VERSION "1.8.0-alpha"
+//#define IRRLICHT_VERSION_SVN -alpha
+#define IRRLICHT_SDK_VERSION "1.8.0"
 
 #include <stdio.h> // TODO: Although included elsewhere this is required at least for mingw
 
@@ -227,7 +227,8 @@ you will not be able to use anything provided by the GUI Environment, including 
 //! Define _IRR_WCHAR_FILESYSTEM to enable unicode filesystem support for the engine.
 /** This enables the engine to read/write from unicode filesystem. If you
 disable this feature, the engine behave as before (ansi). This is currently only supported
-for Windows based systems. */
+for Windows based systems. You also have to set #define UNICODE for this to compile.
+*/
 //#define _IRR_WCHAR_FILESYSTEM
 #ifdef NO_IRR_WCHAR_FILESYSTEM
 #undef _IRR_WCHAR_FILESYSTEM
