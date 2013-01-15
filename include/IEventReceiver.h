@@ -33,6 +33,18 @@ namespace irr
 		/** Like mouse events, keyboard events are created by the device and passed to
 		IrrlichtDevice::postEventFromUser. They take the same path as mouse events. */
 		EET_KEY_INPUT_EVENT,
+        
+        //! A multi touch event.
+		EET_MULTI_TOUCH_EVENT,
+        
+        //! A accelerometer event.
+        EET_ACCELEROMETER_EVENT,
+        
+        //! A gyroscope event.
+        EET_GYROSCOPE_EVENT,
+        
+        //! A device motion event.
+        EET_DEVICE_MOTION_EVENT,
 
 		//! A joystick (joypad, gamepad) input event.
 		/** Joystick events are created by polling all connected joysticks once per
@@ -63,9 +75,6 @@ namespace irr
 		MacOS: Not yet implemented
 		*/
 		EET_USER_EVENT,
-        
-        //! A multi touch event.
-		EET_MULTI_TOUCH_EVENT,
 
 		//! This enum is never used, it only forces the compiler to
 		//! compile these enumeration values to 32 bit.
@@ -401,6 +410,48 @@ struct SEvent
 		//! Type of multi touch event
 		EMULTI_TOUCH_INPUT_EVENT Event;
 	};
+    
+    //! Any kind of accelerometer event.
+	struct SAccelerometerEvent
+	{
+        
+        // X acceleration.
+		f64 X;
+        
+        // Y acceleration.
+		f64 Y;
+        
+        // Z acceleration.
+		f64 Z;
+	};
+    
+    //! Any kind of gyroscope event.
+	struct SGyroscopeEvent
+	{
+        
+        // X rotation.
+		f64 X;
+        
+        // Y rotation.
+		f64 Y;
+        
+        // Z rotation.
+		f64 Z;
+	};
+    
+    //! Any kind of device motion event.
+	struct SDeviceMotionEvent
+	{
+        
+        // X angle - roll.
+		f64 X;
+        
+        // Y angle - pitch.
+		f64 Y;
+        
+        // Z angle - yaw.
+		f64 Z;
+	};
 
 	//! A joystick event.
 	/** Unlike other events, joystick events represent the result of polling
@@ -488,6 +539,9 @@ struct SEvent
 		struct SMouseInput MouseInput;
 		struct SKeyInput KeyInput;
         struct SMultiTouchInput MultiTouchInput;
+        struct SAccelerometerEvent AccelerometerEvent;
+        struct SGyroscopeEvent GyroscopeEvent;
+        struct SDeviceMotionEvent DeviceMotionEvent;
 		struct SJoystickEvent JoystickEvent;
 		struct SLogEvent LogEvent;
 		struct SUserEvent UserEvent;

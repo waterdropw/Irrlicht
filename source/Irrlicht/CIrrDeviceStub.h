@@ -119,6 +119,42 @@ namespace irr
 		//! Activate any joysticks, and generate events for them.
 		virtual bool activateJoysticks(core::array<SJoystickInfo> & joystickInfo);
 
+        //! Activate accelerometer.
+        virtual bool activateAccelerometer(float updateInterval = 0.016666f);
+        
+        //! Deactivate accelerometer.
+        virtual bool deactivateAccelerometer();
+        
+        //! Is accelerometer active.
+        virtual bool isAccelerometerActive();
+        
+        //! Is accelerometer available.
+        virtual bool isAccelerometerAvailable();
+        
+        //! Activate gyroscope.
+        virtual bool activateGyroscope(float updateInterval = 0.016666f);
+        
+        //! Deactivate gyroscope.
+        virtual bool deactivateGyroscope();
+        
+        //! Is gyroscope active.
+        virtual bool isGyroscopeActive();
+        
+        //! Is gyroscope available.
+        virtual bool isGyroscopeAvailable();
+        
+        //! Activate device motion.
+        virtual bool activateDeviceMotion(float updateInterval = 0.016666f);
+        
+        //! Deactivate device motion.
+        virtual bool deactivateDeviceMotion();
+        
+        //! Is device motion active.
+        virtual bool isDeviceMotionActive();
+        
+        //! Is device motion available.
+        virtual bool isDeviceMotionAvailable();
+
 		//! Set the current Gamma Value for the Display
 		virtual bool setGammaRamp( f32 red, f32 green, f32 blue, f32 brightness, f32 contrast );
 
